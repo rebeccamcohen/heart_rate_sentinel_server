@@ -4,3 +4,4 @@ pytest-cov
 requests
 flask
 ipython
+pymodm

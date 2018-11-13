@@ -1,0 +1,6 @@
+pytest
+pytest-pep8
+pytest-cov
+requests
+flask
+ipython

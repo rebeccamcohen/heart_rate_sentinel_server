@@ -1,4 +1,3 @@
-from server import get_new_patient
 from new_patient import validate_new_patient_request
 from new_patient import ValidationError
 import pytest

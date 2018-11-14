@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 from pymodm import connect
-from pymodm import MongoModel, fields
 from new_patient import validate_new_patient_request
 from new_patient import ValidationError
 from database import User
@@ -31,7 +30,7 @@ def get_new_patient():
 
     result = {
         "message": "Added patient successfully "
-                   "to the database".format(request.json["patient_id"]),
+                   "to the database"
     }
     return jsonify(result)
 

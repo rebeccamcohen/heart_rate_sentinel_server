@@ -1,8 +1,17 @@
+class ValidationError(Exception):
+    def __init__(self, message):
+        self.message = message
 
-def new_patient():
-    new_patient_dict = {
-        "patient_id": 1,  # usually this would be the patient MRN
-        "attending_email": "suyash.kumar@duke.edu",
-        "user_age": 50,  # in years
-    }
-    return new_patient_dict
+
+REQUIRED_REQUEST_KEYS = [
+    "patient_id",
+    "attending_email",
+    "user_age",
+]
+
+
+def validate_new_patient_request(req):
+    for key in REQUIRED_REQUEST_KEYS:
+        if key not in req.keys():
+            raise ValidationError(
+                "Key '{0}' not present in request".format(key))

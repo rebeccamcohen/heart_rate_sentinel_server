@@ -11,17 +11,13 @@ def test_get_new_patient1():
     with pytest.raises(ValidationError):
         validate_new_patient_request(new_patient)
 
+
 def test_get_new_patient2():
     new_patient = {
         "patient_id": 1,
         "attending_email": "rebecca.cohen@duke.edu",
         "age": 20
     }
+
     with pytest.raises(ValidationError):
         validate_new_patient_request(new_patient)
-
-
-
-
-
-

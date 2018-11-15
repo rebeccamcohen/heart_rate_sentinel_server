@@ -6,6 +6,8 @@ from new_patient import ValidationError
 from heart_rate import ValidationError
 from database import User
 from statistics import mean
+from tachycardic import is_tachycardic
+from sendgrid_email import send_email
 import datetime
 import logging
 
@@ -22,12 +24,7 @@ def get_new_patient():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     print(r)
-    # patient_dict = {
-    #    "patient_id":r["patient_id"],
-    #    "attending_email":r["attending_email"],
-    #    "user_age":r["user_age"]
-    # }
-    # return jsonify(patient_dict)
+
     try:
         validate_new_patient_request(r)
     except ValidationError as inst:
@@ -49,7 +46,7 @@ def get_new_patient():
 def heart_rate():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
-    dt = datetime.datetime.now()
+    dt = str(datetime.datetime.now())
     print(r)
     print(dt)
 
@@ -60,7 +57,50 @@ def heart_rate():
     result = {
         "message": "stored heart rate measurement and associated time stamp"
     }
+
     return jsonify(result)
+
+
+@app.route("/api/status/<patient_id>", methods=["GET"])
+def get_status(patient_id):
+    connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
+    r = int(patient_id)
+    try:
+        for user in User.objects.raw({"_id": r}):
+            try:
+                validate_heart_rates_requests(user.heart_rate)
+            except ValidationError:
+                logging.warning("No heart rate "
+                                "measurements associated with "
+                                "specified patient")
+                return jsonify({"message": "No heart rate "
+                                           "measurements associated with "
+                                           "specified patient"})
+            recent_hr = user.heart_rate[-1]
+            age = float(user.user_age)
+            recent_time_stamp = user.time_stamp[-1]
+            time_str = str(recent_time_stamp)
+            is_tach = is_tachycardic(age, recent_hr)
+
+            if is_tach == 1:
+                d = {
+                    "message": "patient is tachycardic",
+                    "timestamp of recent hr measurement": time_str
+                }
+
+                send_email(r, time_str)
+
+                return jsonify(d)
+
+            if is_tach == 0:
+                d = {
+                    "message": "patient is not tachycardic",
+                    "timestamp of recent hr measurement": time_str
+                }
+                return jsonify(d)
+    except UnboundLocalError:
+        logging.warning("Tried to specify a patient that does not exist")
+        raise ValidationError("Specified patient does not exist")
 
 
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])

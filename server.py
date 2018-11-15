@@ -68,11 +68,40 @@ def heart_rate():
 def get_status(patient_id):
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
-    for user in User.objects.raw({"_id": r}):
-        recent_hr = user.heart_rate[-1]
-        age = user.user_age
+    try:
+        for user in User.objects.raw({"_id": r}):
+            try:
+                validate_heart_rates_requests(user.heart_rate)
+            except ValidationError:
+                logging.warning("No heart rate "
+                                "measurements associated with "
+                                "specified patient")
+            return jsonify({"message": "No heart rate "
+                                           "measurements associated with "
+                                           "specified patient"})
+    except UnboundLocalError:
+        logging.warning("Tried to specify a patient that does not exist")
+        raise ValidationError("Specified patient does not exist")
 
-        is_tachycardic(recent_hr, age)
+    recent_hr = user.heart_rate[-1]
+    age = float(user.user_age)
+    recent_time_stamp = user.time_stamp[-1]
+    time_str = str(recent_time_stamp)
+    is_tach = is_tachycardic(recent_hr, age)
+
+    if is_tach == 1:
+        d = {
+                "message": "patient is tachycardic",
+                "timestamp of recent hr": time_str
+            }
+        return jsonify(d)
+
+    if is_tach == 0:
+        d = {
+                "message": "patient is not tachycardic",
+                "timestamp of recent hr": time_str
+            }
+        return jsonify(d)
 
 
 

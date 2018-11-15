@@ -1,9 +1,19 @@
 from flask import Flask, jsonify, request
 from pymodm import connect
 from new_patient import validate_new_patient_request
+from heart_rate import validate_heart_rates_requests
+from patient_id import validate_patient_id
 from new_patient import ValidationError
+from heart_rate import ValidationError
+from patient_id import ValidationError
 from database import User
 import datetime
+import logging
+
+logging.basicConfig(filename="main_log.txt",
+                    format='%(asctime)s %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
 
 app = Flask(__name__)
 
@@ -52,6 +62,26 @@ def heart_rate():
         "message": "stored heart rate measurement and associated time stamp"
     }
     return jsonify(result)
+
+@app.route("/api/heart_rate/<patient_id>", methods=["GET"])
+def get_heart_rates(patient_id):
+    connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
+    r = int(patient_id)
+
+    validate_patient_id(r)
+
+    try:
+        for user in User.objects.raw({"_id": r}):
+            try:
+                validate_heart_rates_requests(user.heart_rate)
+            except ValidationError:
+                logging.warning("No heart rate measurements associated with specified patient")
+                return jsonify({"message": "No heart rate measurements associated with specified patient"})
+        logging.info("Successfully returned all previous heart rate measurements for specified patient")
+        return jsonify(user.heart_rate)
+    except UnboundLocalError:
+        logging.warning("Tried to specify a patient that does not exist")
+        raise ValidationError("Specified patient does not exist")
 
 
 if __name__ == "__main__":

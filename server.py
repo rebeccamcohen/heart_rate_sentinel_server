@@ -7,6 +7,7 @@ from heart_rate import ValidationError
 from database import User
 from statistics import mean
 from tachycardic import is_tachycardic
+from sendgrid_email import send_email
 import datetime
 import logging
 
@@ -23,12 +24,7 @@ def get_new_patient():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     print(r)
-    # patient_dict = {
-    #    "patient_id":r["patient_id"],
-    #    "attending_email":r["attending_email"],
-    #    "user_age":r["user_age"]
-    # }
-    # return jsonify(patient_dict)
+
     try:
         validate_new_patient_request(r)
     except ValidationError as inst:
@@ -61,6 +57,7 @@ def heart_rate():
     result = {
         "message": "stored heart rate measurement and associated time stamp"
     }
+
     return jsonify(result)
 
 
@@ -90,6 +87,9 @@ def get_status(patient_id):
                     "message": "patient is tachycardic",
                     "timestamp of recent hr measurement": time_str
                 }
+
+                send_email(r, time_str)
+
                 return jsonify(d)
 
             if is_tach == 0:

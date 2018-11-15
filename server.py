@@ -76,33 +76,31 @@ def get_status(patient_id):
                 logging.warning("No heart rate "
                                 "measurements associated with "
                                 "specified patient")
-            return jsonify({"message": "No heart rate "
+                return jsonify({"message": "No heart rate "
                                            "measurements associated with "
                                            "specified patient"})
+            recent_hr = user.heart_rate[-1]
+            age = float(user.user_age)
+            recent_time_stamp = user.time_stamp[-1]
+            time_str = str(recent_time_stamp)
+            is_tach = is_tachycardic(age, recent_hr)
+
+            if is_tach == 1:
+                d = {
+                    "message": "patient is tachycardic",
+                    "timestamp of recent hr measurement": time_str
+                }
+                return jsonify(d)
+
+            if is_tach == 0:
+                d = {
+                    "message": "patient is not tachycardic",
+                    "timestamp of recent hr measurement": time_str
+                }
+                return jsonify(d)
     except UnboundLocalError:
         logging.warning("Tried to specify a patient that does not exist")
         raise ValidationError("Specified patient does not exist")
-
-    recent_hr = user.heart_rate[-1]
-    age = float(user.user_age)
-    recent_time_stamp = user.time_stamp[-1]
-    time_str = str(recent_time_stamp)
-    is_tach = is_tachycardic(recent_hr, age)
-
-    if is_tach == 1:
-        d = {
-                "message": "patient is tachycardic",
-                "timestamp of recent hr": time_str
-            }
-        return jsonify(d)
-
-    if is_tach == 0:
-        d = {
-                "message": "patient is not tachycardic",
-                "timestamp of recent hr": time_str
-            }
-        return jsonify(d)
-
 
 
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])

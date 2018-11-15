@@ -41,11 +41,9 @@ def is_tachycardic(age, recent_hr):  # age in years
             return 1
         else:
             return 0
-    if age >=15:
+    if age >= 15:
         if recent_hr > 100:
             return 1
         else:
             return 0
-
-
 

@@ -3,6 +3,7 @@ from pymodm import connect
 from new_patient import validate_new_patient_request
 from new_patient import ValidationError
 from database import User
+import datetime
 
 app = Flask(__name__)
 
@@ -31,6 +32,24 @@ def get_new_patient():
     result = {
         "message": "Added patient successfully "
                    "to the database"
+    }
+    return jsonify(result)
+
+
+@app.route("/api/heart_rate", methods=["POST"])
+def heart_rate():
+    connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
+    r = request.get_json()  # parses input request data as json
+    dt = datetime.datetime.now()
+    print(r)
+    print(dt)
+
+    id_user = User.objects.raw({"_id": r["patient_id"]})
+    id_user.update({"$push": {"heart_rate": r["heart_rate"]}})
+    id_user.update({"$push": {"time_stamp": dt}})
+
+    result = {
+        "message": "stored heart rate measurement and associated time stamp"
     }
     return jsonify(result)
 

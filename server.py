@@ -46,7 +46,7 @@ def get_new_patient():
 def heart_rate():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
-    dt = datetime.datetime.now()
+    dt = str(datetime.datetime.now())
     print(r)
     print(dt)
 

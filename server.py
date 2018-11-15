@@ -63,6 +63,7 @@ def heart_rate():
     }
     return jsonify(result)
 
+
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])
 def get_heart_rates(patient_id):
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
@@ -75,9 +76,15 @@ def get_heart_rates(patient_id):
             try:
                 validate_heart_rates_requests(user.heart_rate)
             except ValidationError:
-                logging.warning("No heart rate measurements associated with specified patient")
-                return jsonify({"message": "No heart rate measurements associated with specified patient"})
-        logging.info("Successfully returned all previous heart rate measurements for specified patient")
+                logging.warning("No heart rate "
+                                "measurements associated with "
+                                "specified patient")
+                return jsonify({"message": "No heart rate "
+                                           "measurements associated with "
+                                           "specified patient"})
+        logging.info("Successfully returned all "
+                     "previous heart rate measurements "
+                     "for specified patient")
         return jsonify(user.heart_rate)
     except UnboundLocalError:
         logging.warning("Tried to specify a patient that does not exist")

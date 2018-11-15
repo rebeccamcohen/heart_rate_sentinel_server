@@ -6,6 +6,7 @@ from new_patient import ValidationError
 from heart_rate import ValidationError
 from database import User
 from statistics import mean
+from tachycardic import is_tachycardic
 import datetime
 import logging
 
@@ -61,6 +62,18 @@ def heart_rate():
         "message": "stored heart rate measurement and associated time stamp"
     }
     return jsonify(result)
+
+
+@app.route("/api/status/<patient_id>", methods=["GET"])
+def get_status(patient_id):
+    connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
+    r = int(patient_id)
+    for user in User.objects.raw({"_id": r}):
+        recent_hr = user.heart_rate[-1]
+        age = user.user_age
+
+        is_tachycardic(recent_hr, age)
+
 
 
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])

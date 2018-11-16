@@ -271,7 +271,9 @@ def get_average_heart_rate(patient_id):
 
 @app.route("/api/heart_rate/internal_average", methods=["POST"])
 def internal_average():
-    """Calculates patient's internal average heart rate over measurements  since a specified time
+    """Calculates patient's internal average
+    heart rate over
+    measurements  since a specified time
 
     Returns:
         internal_avg (Response instance): heart rate

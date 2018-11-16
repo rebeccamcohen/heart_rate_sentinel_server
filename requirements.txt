@@ -6,3 +6,4 @@ flask
 ipython
 pymodm
 sendgrid
+sphinx

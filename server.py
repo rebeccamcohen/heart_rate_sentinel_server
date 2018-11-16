@@ -271,8 +271,7 @@ def get_average_heart_rate(patient_id):
 
 @app.route("/api/heart_rate/internal_average", methods=["POST"])
 def internal_average():
-    """Calculates patient's internal average
-    heart rate over measurements  since a specified time
+    """Calculates patient's internal average heart rate over measurements  since a specified time
 
     Returns:
         internal_avg (Response instance): heart rate
@@ -291,6 +290,7 @@ def internal_average():
 
 
     """
+
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()
 

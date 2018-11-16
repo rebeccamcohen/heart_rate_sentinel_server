@@ -9,6 +9,14 @@ logging.basicConfig(filename="main_log.txt",
 
 
 def data_for_is_tach(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     p = User.objects.raw({"_id": patient_id}).first()
     recent_hr = p.heart_rate[-1]
@@ -20,6 +28,15 @@ def data_for_is_tach(patient_id):
 
 
 def is_tachycardic(age, recent_hr):  # age in years
+    """
+
+    Args:
+        age:
+        recent_hr:
+
+    Returns:
+
+    """
 
     if age < float(1 / 12):
         raise ValueError("Age must be greater "

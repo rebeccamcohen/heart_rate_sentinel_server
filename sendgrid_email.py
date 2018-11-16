@@ -4,6 +4,15 @@ from sendgrid.helpers.mail import *
 
 
 def send_email(patient_id, time_stamp):
+    """
+
+    Args:
+        patient_id:
+        time_stamp:
+
+    Returns:
+
+    """
     sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
     from_email = Email("rmcohen100@gmail.com")
     to_email = Email("rmc50@duke.edu")

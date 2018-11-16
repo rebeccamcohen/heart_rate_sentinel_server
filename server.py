@@ -31,6 +31,12 @@ app = Flask(__name__)
 
 @app.route("/api/new_patient", methods=["POST"])
 def get_new_patient():
+    """
+
+    Returns:
+
+    """
+
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     print(r)
@@ -64,6 +70,11 @@ def get_new_patient():
 
 @app.route("/api/heart_rate", methods=["POST"])
 def heart_rate():
+    """
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     patient_id = r["patient_id"]
@@ -95,6 +106,14 @@ def heart_rate():
 
 @app.route("/api/status/<patient_id>", methods=["GET"])
 def get_status(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
     try:
@@ -132,6 +151,14 @@ def get_status(patient_id):
 
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])
 def get_heart_rates(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
 
@@ -157,6 +184,14 @@ def get_heart_rates(patient_id):
 
 @app.route("/api/heart_rate/average/<patient_id>", methods=["GET"])
 def get_average_heart_rate(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
 
@@ -182,6 +217,11 @@ def get_average_heart_rate(patient_id):
 
 @app.route("/api/heart_rate/internal_average", methods=["POST"])
 def internal_average():
+    """
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()
 

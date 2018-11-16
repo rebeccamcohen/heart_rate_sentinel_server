@@ -45,6 +45,14 @@ REQUIRED_REQUEST_KEYS_POST_INTERNAL_AVERAGE = [
 
 
 def validate_new_patient(req):
+    """
+
+    Args:
+        req:
+
+    Returns:
+
+    """
     for key in REQUIRED_REQUEST_KEYS_NEW_PATIENT:
         if key not in req.keys():
             raise ValidationError(
@@ -52,6 +60,14 @@ def validate_new_patient(req):
 
 
 def check_new_id(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     my_id = patient_id
     all_ids = []
@@ -65,6 +81,14 @@ def check_new_id(patient_id):
 
 
 def validate_post_heart_rate(req):
+    """
+
+    Args:
+        req:
+
+    Returns:
+
+    """
     for key in REQUIRED_REQUEST_KEYS_POST_HEART_RATE:
         if key not in req.keys():
             raise ValidationError(
@@ -72,6 +96,14 @@ def validate_post_heart_rate(req):
 
 
 def check_list_empty(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     p = User.objects.raw({"_id": patient_id}).first()
     hr_list = p.heart_rate
@@ -82,6 +114,14 @@ def check_list_empty(patient_id):
 
 
 def check_id_exists(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
 
     my_id = patient_id
@@ -95,6 +135,14 @@ def check_id_exists(patient_id):
 
 
 def validate_post_int_avg(req):
+    """
+
+    Args:
+        req:
+
+    Returns:
+
+    """
     for key in REQUIRED_REQUEST_KEYS_POST_INTERNAL_AVERAGE:
         if key not in req.keys():
             raise ValidationError("Key '{0}' not "
@@ -102,6 +150,14 @@ def validate_post_int_avg(req):
 
 
 def check_hr_since_list_empty(heart_rates_since):
+    """
+
+    Args:
+        heart_rates_since:
+
+    Returns:
+
+    """
     if len(heart_rates_since) == 0:
         raise NoHrSinceError("No heart rate measurements "
                              "exist since specified time stamp")

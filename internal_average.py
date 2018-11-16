@@ -9,6 +9,14 @@ logging.basicConfig(filename="main_log.txt",
 
 
 def data_for_internal_average(patient_id):
+    """
+
+    Args:
+        patient_id:
+
+    Returns:
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     p = User.objects.raw({"_id": patient_id}).first()
     time_stamps = p.time_stamp
@@ -18,6 +26,16 @@ def data_for_internal_average(patient_id):
 
 
 def hr_since_specified_time(d, time_stamps, hr_list):
+    """
+
+    Args:
+        d:
+        time_stamps:
+        hr_list:
+
+    Returns:
+
+    """
     heart_rates_since = []
     for item in time_stamps:
         if item > d:

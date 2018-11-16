@@ -45,12 +45,13 @@ REQUIRED_REQUEST_KEYS_POST_INTERNAL_AVERAGE = [
 
 
 def validate_new_patient(req):
-    """
+    """Validates that all required keys are present in request
 
     Args:
-        req:
+        req (json): New patient info
 
-    Returns:
+    Raises:
+        ValidationError: If a required key is not present in request
 
     """
     for key in REQUIRED_REQUEST_KEYS_NEW_PATIENT:
@@ -60,12 +61,13 @@ def validate_new_patient(req):
 
 
 def check_new_id(patient_id):
-    """
+    """Ensures that new users do not use a patient id that is already taken
 
     Args:
-        patient_id:
+        patient_id: Specified patient id
 
-    Returns:
+    Raises:
+        InputError: If the patient_id specified in request already exists
 
     """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
@@ -81,12 +83,13 @@ def check_new_id(patient_id):
 
 
 def validate_post_heart_rate(req):
-    """
+    """Validates that all required keys are present in request
 
     Args:
-        req:
+        req (json): Heart rate measurements
 
-    Returns:
+    Raises:
+        ValidationError: If a required key is not present in request
 
     """
     for key in REQUIRED_REQUEST_KEYS_POST_HEART_RATE:
@@ -96,12 +99,14 @@ def validate_post_heart_rate(req):
 
 
 def check_list_empty(patient_id):
-    """
+    """Checks if the list of heart rates
+    associated with a patient is empty
 
     Args:
-        patient_id:
+        patient_id: specified patient id
 
-    Returns:
+    RaisesEmpyHrListError: If no heart rate measurements
+    exist for specified user
 
     """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
@@ -114,12 +119,13 @@ def check_list_empty(patient_id):
 
 
 def check_id_exists(patient_id):
-    """
+    """Checks if a specified patient id exists
 
     Args:
-        patient_id:
+        patient_id: Specified patient id
 
-    Returns:
+    Raises:
+        InputError: If specified user does not exist
 
     """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
@@ -135,12 +141,13 @@ def check_id_exists(patient_id):
 
 
 def validate_post_int_avg(req):
-    """
+    """Validates that all required keys are present in request
 
     Args:
-        req:
+        req (json): Patient id and time stamp from request
 
-    Returns:
+    Raises:
+        ValidationError: If a required key is not present in request
 
     """
     for key in REQUIRED_REQUEST_KEYS_POST_INTERNAL_AVERAGE:
@@ -150,12 +157,14 @@ def validate_post_int_avg(req):
 
 
 def check_hr_since_list_empty(heart_rates_since):
-    """
+    """Checks if heart rates exist since specified time stamp
 
     Args:
-        heart_rates_since:
+        heart_rates_since (list): Heart rate measurements
+        since specified time
 
-    Returns:
+    Raises:
+        NoHrSinceError: If no heart rate measurements exist for specified user
 
     """
     if len(heart_rates_since) == 0:

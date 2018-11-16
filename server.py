@@ -1,12 +1,22 @@
 from flask import Flask, jsonify, request
 from pymodm import connect
-from new_patient import validate_new_patient_request
-from heart_rate import validate_heart_rates_requests
-from new_patient import ValidationError
-from heart_rate import ValidationError
+from validation import validate_new_patient
+from validation import check_new_id
+from validation import InputError
+from validation import validate_post_heart_rate
+from validation import ValidationError
+from validation import check_list_empty
+from validation import EmptyHrListError
+from validation import check_id_exists
+from validation import validate_post_int_avg
+from validation import check_hr_since_list_empty
+from validation import NoHrSinceError
 from database import User
 from statistics import mean
+from tachycardic import data_for_is_tach
 from tachycardic import is_tachycardic
+from internal_average import data_for_internal_average
+from internal_average import hr_since_specified_time
 from sendgrid_email import send_email
 import datetime
 import logging
@@ -24,21 +34,31 @@ def get_new_patient():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     print(r)
+    patient_id = r["patient_id"]
+
+    check_new_id(r)
 
     try:
-        validate_new_patient_request(r)
+        validate_new_patient(r)
     except ValidationError as inst:
+        logging.warning(inst.message)
         return jsonify({"message": inst.message})
+
+    try:
+        check_new_id(patient_id)
+    except InputError as inst2:
+        logging.warning(inst2.message)
+        return jsonify({"message:": inst2.message})
 
     patient = User(patient_id=r["patient_id"],
                    attending_email=r["attending_email"],
                    user_age=r["user_age"])
     patient.save()
 
-    result = {
-        "message": "Added patient successfully "
-                   "to the database"
-    }
+    result = {"message": "Added patient {0} successfully "
+                         "to the database".format(patient_id)}
+    logging.info("Added patient {0} successfully "
+                 "to the database".format(patient_id))
     return jsonify(result)
 
 
@@ -46,18 +66,30 @@ def get_new_patient():
 def heart_rate():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
-    dt = str(datetime.datetime.now())
-    print(r)
-    print(dt)
+    patient_id = r["patient_id"]
+    try:
+        validate_post_heart_rate(r)
+    except ValidationError as inst3:
+        logging.warning("No heart rate measurements exist specified patient")
+        return jsonify({"message": inst3.message})
 
-    id_user = User.objects.raw({"_id": r["patient_id"]})
+    dt = str(datetime.datetime.now())
+
+    id_user = User.objects.raw({"_id": patient_id})
     id_user.update({"$push": {"heart_rate": r["heart_rate"]}})
     id_user.update({"$push": {"time_stamp": dt}})
+    logging.info("stored heart rate measurement and associated time stamp")
 
-    result = {
-        "message": "stored heart rate measurement and associated time stamp"
-    }
+    (age, recent_hr, recent_time_str) = data_for_is_tach(patient_id)
+    is_tach = is_tachycardic(age, recent_hr)
 
+    if is_tach == 1:
+        send_email(patient_id, recent_time_str)
+        logging.info("Patient {0} is tachycardic "
+                     "and email sent".format(patient_id))
+
+    result = {"message": "heartrate added successfully to the database"}
+    logging.info("heartrate added successfully to the database")
     return jsonify(result)
 
 
@@ -66,41 +98,36 @@ def get_status(patient_id):
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
     try:
-        for user in User.objects.raw({"_id": r}):
-            try:
-                validate_heart_rates_requests(user.heart_rate)
-            except ValidationError:
-                logging.warning("No heart rate "
-                                "measurements associated with "
-                                "specified patient")
-                return jsonify({"message": "No heart rate "
-                                           "measurements associated with "
-                                           "specified patient"})
-            recent_hr = user.heart_rate[-1]
-            age = float(user.user_age)
-            recent_time_stamp = user.time_stamp[-1]
-            time_str = str(recent_time_stamp)
-            is_tach = is_tachycardic(age, recent_hr)
+        check_id_exists(r)
+    except InputError as inst4:
+        logging.warning("Specified a user that does not exist")
+        return jsonify({"message": inst4.message})
 
-            if is_tach == 1:
-                d = {
-                    "message": "patient is tachycardic",
-                    "timestamp of recent hr measurement": time_str
-                }
+    try:
+        check_list_empty(r)
+    except EmptyHrListError as inst5:
+        logging.warning("No heart rate measurements exist for specified user")
+        return jsonify({"message": inst5.message})
 
-                send_email(r, time_str)
+    (age, recent_hr, recent_time_str) = data_for_is_tach(r)
 
-                return jsonify(d)
+    is_tach = is_tachycardic(age, recent_hr)
 
-            if is_tach == 0:
-                d = {
-                    "message": "patient is not tachycardic",
-                    "timestamp of recent hr measurement": time_str
-                }
-                return jsonify(d)
-    except UnboundLocalError:
-        logging.warning("Tried to specify a patient that does not exist")
-        raise ValidationError("Specified patient does not exist")
+    if is_tach == 1:
+        d = {
+            "message": "patient is tachycardic",
+            "timestamp of recent hr measurement": recent_time_str
+        }
+        logging.info("successfully returned that patient is tachycardic")
+        return jsonify(d)
+
+    if is_tach == 0:
+        d = {
+            "message": "patient is tachycardic",
+            "timestamp of recent hr measurement": recent_time_str
+        }
+        logging.info("successfully returned that patient is not tachycardic")
+        return jsonify(d)
 
 
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])
@@ -109,23 +136,23 @@ def get_heart_rates(patient_id):
     r = int(patient_id)
 
     try:
-        for user in User.objects.raw({"_id": r}):
-            try:
-                validate_heart_rates_requests(user.heart_rate)
-            except ValidationError:
-                logging.warning("No heart rate "
-                                "measurements associated with "
-                                "specified patient")
-                return jsonify({"message": "No heart rate "
-                                           "measurements associated with "
-                                           "specified patient"})
-        logging.info("Successfully returned all "
-                     "previous heart rate measurements "
-                     "for specified patient")
-        return jsonify(user.heart_rate)
-    except UnboundLocalError:
-        logging.warning("Tried to specify a patient that does not exist")
-        raise ValidationError("Specified patient does not exist")
+        check_id_exists(r)
+    except InputError as inst4:
+        logging.warning("Specified a user that does not exist")
+        return jsonify({"message": inst4.message})
+
+    try:
+        check_list_empty(r)
+    except EmptyHrListError as inst5:
+        logging.warning("No heart rate measurements exist for specified user")
+        return jsonify({"message": inst5.message})
+
+    p = User.objects.raw({"_id": r}).first()
+    hr_list = p.heart_rate
+
+    logging.info("Successfully returned all previous "
+                 "heart rate measurements for specified patient")
+    return jsonify(hr_list)
 
 
 @app.route("/api/heart_rate/average/<patient_id>", methods=["GET"])
@@ -134,48 +161,75 @@ def get_average_heart_rate(patient_id):
     r = int(patient_id)
 
     try:
-        for user in User.objects.raw({"_id": r}):
-            try:
-                validate_heart_rates_requests(user.heart_rate)
-            except ValidationError:
-                logging.warning("No heart rate "
-                                "measurements associated with "
-                                "specified patient")
-                return jsonify({"message": "No heart rate "
-                                           "measurements associated with "
-                                           "specified patient"})
+        check_id_exists(r)
+    except InputError as inst4:
+        logging.warning("Specified a user that does not exist")
+        return jsonify({"message": inst4.message})
 
-        logging.info("Successfully returned patient's average heart rate")
-        avg_heart_rate = mean(user.heart_rate)
-        return jsonify(avg_heart_rate)
+    try:
+        check_list_empty(r)
+    except EmptyHrListError as inst5:
+        logging.warning("No heart rate measurements exist for specified user")
+        return jsonify({"message": inst5.message})
 
-    except UnboundLocalError:
-        logging.warning("Tried to specify a patient that does not exist")
-        raise ValidationError("Specified patient does not exist")
+    p = User.objects.raw({"_id": r}).first()
+    hr_list = p.heart_rate
+    avg_heart_rate = mean(hr_list)
+    logging.info("Successfully returned average "
+                 "heart rate for specified user")
+    return jsonify(avg_heart_rate)
 
 
 @app.route("/api/heart_rate/internal_average", methods=["POST"])
 def internal_average():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
-    r = request.get_json()  # parses input request data as json
-    d = datetime.datetime.strptime(r["heart_rate_average_since"],
-                                   "%Y-%m-%d %H:%M:%S.%f")
+    r = request.get_json()
 
-    p = User.objects.raw({"_id": r["patient_id"]}).first()
-    time_stamps = p.time_stamp
-    hr_list = p.heart_rate
-    heart_rates_since = []
-
-    for item in time_stamps:
-        if item > d:
-            index = time_stamps.index(item)
-            heart_rates_since.append(hr_list[index])
     try:
-        validate_heart_rates_requests(heart_rates_since)
-    except ValidationError:
-        return jsonify({"message": "No heart rate "
-                                   "measurements taken since "
-                                   "specified time stamp"})
+        validate_post_int_avg(r)
+    except ValidationError as inst:
+        logging.warning(inst.message)
+        return jsonify({"message": inst.message})
+
+    patient_id_str = r["patient_id"]
+    patient_id = int(patient_id_str)
+
+    try:
+        d = datetime.datetime.strptime(r["heart_rate_average_since"],
+                                       "%Y-%m-%d %H:%M:%S.%f")
+    except ValueError:
+        logging.warning("inputted time_stamp data for "
+                        "'heart_rate_average_since' "
+                        "with incorrect format. "
+                        "Use format '%Y-%m-%d %H:%M:%S.%f'")
+        return jsonify("inputted time_stamp data for "
+                       "'heart_rate_average_since' "
+                       "with incorrect format. "
+                       "Use format '%Y-%m-%d %H:%M:%S.%f'")
+
+    try:
+        check_id_exists(patient_id)
+    except InputError:
+        logging.warning("Specified a user that does not exist")
+        return jsonify("Specified a user that does not exist")
+
+    try:
+        check_list_empty(patient_id)
+    except EmptyHrListError as inst5:
+        logging.warning("No heart rate measurements exist for specified user")
+        return jsonify({"message": inst5.message})
+
+    (time_stamps, hr_list) = data_for_internal_average(patient_id)
+
+    heart_rates_since = hr_since_specified_time(d, time_stamps, hr_list)
+
+    try:
+        check_hr_since_list_empty(heart_rates_since)
+    except NoHrSinceError:
+        logging.warning("No heart rate measurements "
+                        "taken since specified date")
+        return jsonify("No heart rate measurements "
+                       "taken since specified date")
 
     internal_avg = mean(heart_rates_since)
     return jsonify(internal_avg)

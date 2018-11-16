@@ -153,6 +153,21 @@ def get_average_heart_rate(patient_id):
         logging.warning("Tried to specify a patient that does not exist")
         raise ValidationError("Specified patient does not exist")
 
+@app.route("/api/heart_rate/internal_average", methods=["POST"])
+def internal_average():
+    connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
+    r = request.get_json()  # parses input request data as json
+    d = datetime.datetime.strptime(r[""], "%Y-%m-%d %H:%M:%S.%f")
+
+p = User.objects.raw({"_id": 6}).first()
+list = p.time_stamp
+hr_list = p.heart_rate
+l = []
+for item in list:
+    if item > datetime.datetime(2018, 11, 15, 18, 2, 32, 33843):
+        index = list.index(item)
+        l.append(hr_list[index])
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1")

@@ -1,4 +1,26 @@
+from database import User
+from pymodm import connect
+import logging
+
+logging.basicConfig(filename="main_log.txt",
+                    format='%(asctime)s %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
+
+
+def data_for_is_tach(patient_id):
+    connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
+    p = User.objects.raw({"_id": patient_id}).first()
+    recent_hr = p.heart_rate[-1]
+    age = float(p.user_age)
+    recent_time_stamp = p.time_stamp[-1]
+    recent_time_str = str(recent_time_stamp)
+
+    return age, recent_hr, recent_time_str
+
+
 def is_tachycardic(age, recent_hr):  # age in years
+
     if age < float(1 / 12):
         raise ValueError("Age must be greater "
                          "than or equal to 1/12 year (1 month)")

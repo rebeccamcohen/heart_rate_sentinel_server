@@ -153,20 +153,32 @@ def get_average_heart_rate(patient_id):
         logging.warning("Tried to specify a patient that does not exist")
         raise ValidationError("Specified patient does not exist")
 
+
 @app.route("/api/heart_rate/internal_average", methods=["POST"])
 def internal_average():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
-    d = datetime.datetime.strptime(r[""], "%Y-%m-%d %H:%M:%S.%f")
+    d = datetime.datetime.strptime(r["heart_rate_average_since"],
+                                   "%Y-%m-%d %H:%M:%S.%f")
 
-p = User.objects.raw({"_id": 6}).first()
-list = p.time_stamp
-hr_list = p.heart_rate
-l = []
-for item in list:
-    if item > datetime.datetime(2018, 11, 15, 18, 2, 32, 33843):
-        index = list.index(item)
-        l.append(hr_list[index])
+    p = User.objects.raw({"_id": r["patient_id"]}).first()
+    time_stamps = p.time_stamp
+    hr_list = p.heart_rate
+    heart_rates_since = []
+
+    for item in time_stamps:
+        if item > d:
+            index = time_stamps.index(item)
+            heart_rates_since.append(hr_list[index])
+    try:
+        validate_heart_rates_requests(heart_rates_since)
+    except ValidationError:
+        return jsonify({"message": "No heart rate "
+                                   "measurements taken since "
+                                   "specified time stamp"})
+
+    internal_avg = mean(heart_rates_since)
+    return jsonify(internal_avg)
 
 
 if __name__ == "__main__":

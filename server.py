@@ -31,6 +31,20 @@ app = Flask(__name__)
 
 @app.route("/api/new_patient", methods=["POST"])
 def get_new_patient():
+    """Adds new patient info (patient id, attending email, and user age)
+    to server and saves new patient to database
+
+    Returns:
+        Result (Response instance): Description noting successful addition
+        of patient or explanation of error exception
+
+    Excepts:
+        ValidationError: If a required key is not present in request
+        InputError: If the patient_id specified
+        in request already exists
+
+    """
+
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     print(r)
@@ -64,14 +78,37 @@ def get_new_patient():
 
 @app.route("/api/heart_rate", methods=["POST"])
 def heart_rate():
+    """Saves heart rate measurement and time stamp
+    (associated with a patient id) to database, checks
+    if patient is tachycardic, and sends email if patient is tachycardic
+
+    Returns:
+        Result (Response instance): Description noting successful
+        addition of heart rate or explanation of error exception
+
+    Excepts:
+        InputError: If specified user
+        does not exist
+        ValidationError: If a required
+        key is not present in request
+
+
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     patient_id = r["patient_id"]
     try:
-        validate_post_heart_rate(r)
-    except ValidationError as inst3:
-        logging.warning("No heart rate measurements exist specified patient")
+        check_id_exists(r)
+    except InputError as inst3:
+        logging.warning("Specified a user that does not exist")
         return jsonify({"message": inst3.message})
+
+    try:
+        validate_post_heart_rate(r)
+    except ValidationError as inst4:
+        logging.warning(inst4.message)
+        return jsonify({"message": inst4.message})
 
     dt = str(datetime.datetime.now())
 
@@ -95,6 +132,26 @@ def heart_rate():
 
 @app.route("/api/status/<patient_id>", methods=["GET"])
 def get_status(patient_id):
+    """Determine whether or not a
+    specified patient is tachycardic
+    based on previously available heart rate
+
+    Args:
+        patient_id: Specified patient id
+
+    Returns:
+        d (Response instance): Whether or not the patient is
+        tachycardic and the time stamp associated
+        with the most recent heart rate measurement
+
+    Excepts:
+        Input Error: If specified user does not exist
+        EmptyHrListError: If no heart rate
+        measurements exist for specified user
+
+
+    """
+
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
     try:
@@ -132,6 +189,22 @@ def get_status(patient_id):
 
 @app.route("/api/heart_rate/<patient_id>", methods=["GET"])
 def get_heart_rates(patient_id):
+    """Returns all previous heart rate
+    measurements for specified patient
+
+    Args:
+        patient_id: Specified patient id
+
+    Returns:
+        hr_list (Response instance): all previous heart rate
+        measurements for specified patient
+
+    Excepts:
+        Input Error: If specified user does not exist
+        EmptyHrListError: if no heart rate
+        measurements exist for specified user
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
 
@@ -157,6 +230,22 @@ def get_heart_rates(patient_id):
 
 @app.route("/api/heart_rate/average/<patient_id>", methods=["GET"])
 def get_average_heart_rate(patient_id):
+    """Calculates patient's average
+    heart rate over all measurements stored for specified user
+
+    Args:
+        patient_id: Specified patient id
+
+    Returns:
+        avg_heart_rate (Response instance): average heart rate over all
+        measurements stored for specified user
+
+    Excepts:
+        Input Error: If specified user does not exist
+        EmptyHrListError: If no heart rate
+        measurements exist for specified user
+
+    """
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = int(patient_id)
 
@@ -182,6 +271,28 @@ def get_average_heart_rate(patient_id):
 
 @app.route("/api/heart_rate/internal_average", methods=["POST"])
 def internal_average():
+    """Calculates patient's internal average
+    heart rate over
+    measurements  since a specified time
+
+    Returns:
+        internal_avg (Response instance): heart rate
+        average since specified time\
+
+    Excepts:
+        ValidationError: If a required key is not present in request
+        ValueError: If inputted time_stamp data for
+                        'heart_rate_average_since'
+                        with incorrect format
+        Input Error: If specified user does not exist
+        EmptyHrListError: If no heart rate measurements
+        exist for specified user
+        NoHrSinceError: If no heart rate measurements
+        exist since specified time
+
+
+    """
+
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()
 

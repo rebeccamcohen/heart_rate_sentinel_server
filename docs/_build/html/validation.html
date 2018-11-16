@@ -1,0 +1,219 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>validation module &#8212; heart_rate_sentinel_server  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-validation">
+<span id="validation-module"></span><h1>validation module<a class="headerlink" href="#module-validation" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="validation.EmptyHrListError">
+<em class="property">exception </em><code class="descclassname">validation.</code><code class="descname">EmptyHrListError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.EmptyHrListError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="validation.InputError">
+<em class="property">exception </em><code class="descclassname">validation.</code><code class="descname">InputError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.InputError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="validation.NoHrSinceError">
+<em class="property">exception </em><code class="descclassname">validation.</code><code class="descname">NoHrSinceError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.NoHrSinceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="validation.UserDoesNotExistError">
+<em class="property">exception </em><code class="descclassname">validation.</code><code class="descname">UserDoesNotExistError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.UserDoesNotExistError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="validation.ValidationError">
+<em class="property">exception </em><code class="descclassname">validation.</code><code class="descname">ValidationError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.ValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.check_hr_since_list_empty">
+<code class="descclassname">validation.</code><code class="descname">check_hr_since_list_empty</code><span class="sig-paren">(</span><em>heart_rates_since</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.check_hr_since_list_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if heart rates exist since specified time stamp</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>heart_rates_since (list): Heart rate measurements
+since specified time</dd>
+<dt>Raises:</dt>
+<dd>NoHrSinceError: If no heart rate measurements exist for specified user</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.check_id_exists">
+<code class="descclassname">validation.</code><code class="descname">check_id_exists</code><span class="sig-paren">(</span><em>patient_id</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.check_id_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a specified patient id exists</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>patient_id: Specified patient id</dd>
+<dt>Raises:</dt>
+<dd>InputError: If specified user does not exist</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.check_list_empty">
+<code class="descclassname">validation.</code><code class="descname">check_list_empty</code><span class="sig-paren">(</span><em>patient_id</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.check_list_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the list of heart rates
+associated with a patient is empty</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>patient_id: specified patient id</dd>
+</dl>
+<p>RaisesEmpyHrListError: If no heart rate measurements
+exist for specified user</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.check_new_id">
+<code class="descclassname">validation.</code><code class="descname">check_new_id</code><span class="sig-paren">(</span><em>patient_id</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.check_new_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensures that new users do not use a patient id that is already taken</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>patient_id: Specified patient id</dd>
+<dt>Raises:</dt>
+<dd>InputError: If the patient_id specified in request already exists</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.validate_new_patient">
+<code class="descclassname">validation.</code><code class="descname">validate_new_patient</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.validate_new_patient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates that all required keys are present in request</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>req (json): New patient info</dd>
+<dt>Raises:</dt>
+<dd>ValidationError: If a required key is not present in request</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.validate_post_heart_rate">
+<code class="descclassname">validation.</code><code class="descname">validate_post_heart_rate</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.validate_post_heart_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates that all required keys are present in request</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>req (json): Heart rate measurements</dd>
+<dt>Raises:</dt>
+<dd>ValidationError: If a required key is not present in request</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="validation.validate_post_int_avg">
+<code class="descclassname">validation.</code><code class="descname">validate_post_int_avg</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="headerlink" href="#validation.validate_post_int_avg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates that all required keys are present in request</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>req (json): Patient id and time stamp from request</dd>
+<dt>Raises:</dt>
+<dd>ValidationError: If a required key is not present in request</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">heart_rate_sentinel_server</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Rebecca Cohen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/validation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -4,6 +4,16 @@ from sendgrid.helpers.mail import *
 
 
 def send_email(patient_id, time_stamp):
+    """Sends email to physician warning them about tachycardic patient
+
+    Args:
+        patient_id (int): Patient id of tachycardic patient
+        time_stamp (datetime.datetime): Time stamp of tachycardic
+        heart rate measurment
+
+    Returns:
+
+    """
     sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
     from_email = Email("rmcohen100@gmail.com")
     to_email = Email("rmc50@duke.edu")

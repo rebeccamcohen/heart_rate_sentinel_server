@@ -1,5 +1,14 @@
 # heart_rate_sentinel_server
 
+**Python files:**
+- server.py: main python file (contains flask server)
+- database.py: creates the class User for the database
+- tachycardic.py: contains functions to calculate whether patient is tachycardic
+- sendgrid_email.py: contains functions to send email
+- validation.py: contains functions to validate data 
+- test files: contains unit tests for functions 
+
+
 **To add a new patient:**
 - will not be able to add a user with a patient_id that already exists 
 - will only be able to add a new user with all of the specified keys

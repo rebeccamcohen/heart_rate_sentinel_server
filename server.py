@@ -98,8 +98,10 @@ def heart_rate():
     connect("mongodb://rebeccacohen:bme590@ds037768.mlab.com:37768/bme_590")
     r = request.get_json()  # parses input request data as json
     patient_id = r["patient_id"]
+    hr = r["heart_rate"]
+
     try:
-        check_id_exists(r)
+        check_id_exists(patient_id)
     except InputError as inst3:
         logging.warning("Specified a user that does not exist")
         return jsonify({"message": inst3.message})
@@ -118,7 +120,7 @@ def heart_rate():
     logging.info("stored heart rate measurement and associated time stamp")
 
     (age, recent_hr, recent_time_str) = data_for_is_tach(patient_id)
-    is_tach = is_tachycardic(age, recent_hr)
+    is_tach = is_tachycardic(age, hr)
 
     if is_tach == 1:
         send_email(patient_id, recent_time_str)
@@ -347,4 +349,4 @@ def internal_average():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="127.0.0.1")
